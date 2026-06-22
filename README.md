@@ -11,6 +11,24 @@ The project provides two selected RRDN generators:
 
 The GAN discriminator uses Batch Normalization during training. BatchNorm is not part of the released generator and is not needed for inference.
 
+## Model architecture
+
+### RRDN generator
+
+![RRDN generator architecture showing the shallow feature extractor, RRDB trunk, global residual connection, and four-times upsampling head](docs/figures/RRDN_Model_Structure.png)
+
+The generator maps a single-channel low-resolution BT field of shape `H x W x 1` to a field of shape `4H x 4W x 1`. A shallow convolution first maps BT values into a feature representation. The deep trunk then applies residual-in-residual dense blocks (RRDBs), each composed of densely connected residual dense blocks (RDBs).
+
+Residual learning occurs at three levels: inside each RDB, across each RRDB, and across the complete feature trunk. The RRDB residual is scaled by 0.2 before it is added to the identity path, which stabilizes deeper training. The final head uses bilinear 4x upsampling followed by convolutional refinement. Batch Normalization is omitted from the generator to avoid unnecessarily transforming the radiometric feature distribution.
+
+### RRDN-GAN refinement
+
+![RRDN-GAN training architecture showing the pretrained generator, reconstruction objective, patch discriminator, and adversarial objectives](docs/figures/GAN_Model_Architecture.png)
+
+GAN training begins from the pretrained 9-RRDB Composite SSIM generator rather than an untrained network. The generator continues to optimize a reconstruction objective while receiving adversarial feedback from a deep PatchGAN-style discriminator. Instead of assigning one real/fake score to an entire scene, the discriminator produces a spatial probability map and evaluates local BT patches around features such as cloud edges, storm boundaries, and sharp thermal transitions.
+
+The released GAN generator was trained with the BatchNorm discriminator variant. The discriminator is required only during adversarial training; prediction uses the generator by itself.
+
 ## Repository layout
 
 ```text
@@ -109,6 +127,47 @@ python scripts/evaluation/plot_predictions.py \
 ```
 
 Metrics include RMSE, global PSNR, mean per-scene SSIM, bias, and inference latency. Plotting preserves the complete spatial field; percentile and residual limits affect only color display.
+
+## Results and visual evaluation
+
+The following figures summarize the current research experiments. They are included as supporting analysis rather than as a claim that fine-scale atmospheric structure can be uniquely recovered from one microwave channel.
+
+### Per-scene model comparison
+
+![Per-scene RMSE, MAE, bias, PSNR, SSIM, and gradient-error distributions for the headline models](docs/figures/per_scene_boxplots_headline.png)
+
+Across the hurricane-specific evaluation scenes, the 9-RRDB Composite SSIM model improves on the MAE-trained RRDN baseline, while both RRDN-GAN variants show the strongest median RMSE, MAE, PSNR, SSIM, and gradient-error results in this comparison. The discriminator BatchNorm ablation produces only a modest difference: the BatchNorm variant is slightly stronger on several reconstruction metrics, while the no-BatchNorm variant has median bias closer to zero.
+
+![Per-scene metric distributions for the broader RRDN architecture and loss-function sweep](docs/figures/per_scene_boxplots_sweep.png)
+
+The broader sweep tests whether additional depth or physics-inspired gradient terms improve reconstruction. Performance improves only up to a point; increasing RRDB depth alone does not consistently close the gap. One interpretation is that a single-channel BT field contains limited information about viewing geometry, atmospheric state, season, surface conditions, and other factors that influence fine-scale structure. Under these constraints, local structural supervision is more effective in these experiments than simply adding model capacity.
+
+### Reconstruction and residuals
+
+![Low-resolution input, bilinear interpolation, RRDN-GAN prediction, and high-resolution truth for a hurricane scene](docs/figures/LR_Prediction_Truth.png)
+
+This paired hurricane example compares the original LR input, bilinear interpolation, the RRDN-GAN reconstruction, and the aligned HR target. The enlarged region shows where the learned model restores sharper eyewall and rainband organization than interpolation alone.
+
+![Composite SSIM and RRDN-GAN reconstructions with residual maps and pixel-error distributions](docs/figures/Image_Reconstruction_Residual_of_Models.png)
+
+Residual maps show `truth - prediction` in Kelvin and make spatially organized errors visible. In this scene, adversarial refinement reduces the displayed error spread relative to the Composite SSIM model while preserving sharper storm structure. A strong visual result should still be read together with RMSE, bias, PSNR, and SSIM because sharper output is not automatically more physically correct.
+
+### Spatial-frequency behavior
+
+![Radially averaged power spectral density comparison of headline models and ground truth](docs/figures/psd_comparison_headline.png)
+
+Radially averaged power spectral density (PSD) measures how spatial variability is distributed across frequency scales. Lower frequency indices correspond to broad thermal patterns; higher indices correspond to finer changes such as cloud edges and storm boundaries. The GAN curves remain closer to the ground-truth spectrum through more of the middle- and high-frequency range than the reconstruction-only models, supporting the interpretation that patch-based adversarial refinement preserves additional local structure.
+
+All models still under-represent the highest-frequency power. This remaining spectral gap is an important limitation: the LR input does not uniquely encode every missing HR feature, and neither Composite SSIM nor the current physics-inspired loss fully resolves that information bottleneck.
+
+### Operational storm examples
+
+<p align="center">
+  <img src="docs/figures/Super_Typhoon_Sinlaku.png" width="47%" alt="Original ATMS brightness-temperature field and RRDN-GAN prediction for Super Typhoon Sinlaku">
+  <img src="docs/figures/Tropical_Cyclone_Develop_Case.png" width="37%" alt="VIIRS context, original ATMS field, and RRDN-GAN prediction for a developing tropical cyclone">
+</p>
+
+These ATMS examples test inference on meteorologically important scenes outside the paired AMSR2 evaluation set. The Super Typhoon Sinlaku comparison shows the original ATMS field and its RRDN-GAN output; the developing-cyclone example adds VIIRS imagery as contextual reference. Because these cases do not have aligned HR BT targets, they support qualitative inspection only and are not used to claim quantitative reconstruction accuracy.
 
 ## Training from scratch
 
