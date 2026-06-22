@@ -292,4 +292,15 @@ Third-party and full research datasets retain their respective terms and are not
 
 ## Citation
 
-Formal manuscript and dataset citations will be added when public identifiers are assigned. The provisional software metadata is available in `CITATION.cff`.
+If this software supports your work, please cite the repository:
+
+```bibtex
+@software{wang2026satellite_bt_super_resolution,
+  author = {Wang, Likun and Chen, Kongkun},
+  title = {Satellite Brightness Temperature Super-Resolution},
+  year = {2026},
+  url = {https://github.com/Kaitou0309/satellite-bt-super-resolution}
+}
+```
+
+The same software metadata is available in `CITATION.cff`. Formal manuscript and dataset citations will be added when public identifiers are assigned.
