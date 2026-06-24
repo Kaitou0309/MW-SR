@@ -237,15 +237,47 @@ The plotting scripts automatically use longitude and latitude axes when compatib
 
 The following figures summarize the current research experiments. They are included as supporting analysis rather than as a claim that fine-scale atmospheric structure can be uniquely recovered from one microwave channel.
 
-### Per-scene model comparison
+### Quantitative model comparison
 
-![Per-scene RMSE, MAE, bias, PSNR, SSIM, and gradient-error distributions for the headline models](docs/figures/per_scene_boxplots_headline.png)
+#### AMSR2 hurricane-specific data performance
 
-Across the hurricane-specific evaluation scenes, the 9-RRDB Composite SSIM model improves on the MAE-trained RRDN baseline, while both RRDN-GAN variants show the strongest median RMSE, MAE, PSNR, SSIM, and gradient-error results in this comparison. The discriminator BatchNorm ablation produces only a modest difference: the BatchNorm variant is slightly stronger on several reconstruction metrics, while the no-BatchNorm variant has median bias closer to zero.
+| Model | RMSE | Bias | SSIM | PSNR |
+| --- | ---: | ---: | ---: | ---: |
+| Bilinear Interpolation | 4.1501 | -0.0566 | 0.8599 | 33.4296 |
+| RRDN 9rrdb (MAE, 5 conv) | 3.6802 | 0.1512 | 0.8818 | 34.4566 |
+| RRDN 9rrdb (Composite SSIM alpha=0.2) | 3.8439 | 0.1288 | 0.8767 | 34.0881 |
+| RRDN 9rrdb (Composite SSIM alpha=0.5) | 3.8327 | -0.0221 | 0.8773 | 34.0962 |
+| RRDN 9rrdb (Composite SSIM alpha=0.8) | 3.3685 | 0.0222 | 0.8991 | 35.2978 |
+| RRDN 3rrdb (Total Physics) | 3.8226 | 0.0303 | 0.8750 | 34.1189 |
+| RRDN 5rrdb (Total Physics) | 3.7809 | 0.0888 | 0.8773 | 34.2399 |
+| RRDN 7rrdb (Total Physics) | 3.8796 | 0.1015 | 0.8739 | 33.9972 |
+| RRDN 9rrdb (Total Physics) | 3.6519 | 0.1077 | 0.8815 | 34.5343 |
+| RRDN 11rrdb (Total Physics) | 3.8114 | 0.0100 | 0.8752 | 34.1412 |
+| RRDN 20rrdb (Total Physics) | 3.8642 | 0.0575 | 0.8736 | 34.0288 |
+| RRDN-GAN 9rrdb (No BatchNorm) | 3.1521 | **0.0087** | 0.9050 | 35.8073 |
+| RRDN-GAN 9rrdb (With BatchNorm) | **3.1057** | 0.0733 | **0.9072** | **35.9081** |
 
-![Per-scene metric distributions for the broader RRDN architecture and loss-function sweep](docs/figures/per_scene_boxplots_sweep.png)
+#### Standard HDF5 evaluation set performance
 
-The broader sweep tests whether additional depth or physics-inspired gradient terms improve reconstruction. Performance improves only up to a point; increasing RRDB depth alone does not consistently close the gap. One interpretation is that a single-channel BT field contains limited information about viewing geometry, atmospheric state, season, surface conditions, and other factors that influence fine-scale structure. Under these constraints, local structural supervision is more effective in these experiments than simply adding model capacity.
+| Model | RMSE | Bias | SSIM | PSNR |
+| --- | ---: | ---: | ---: | ---: |
+| Bilinear Interpolation | 4.2570 | 0.0238 | 0.8396 | 33.3977 |
+| RRDN 9rrdb (MAE, 5 conv) | 3.7622 | 0.0533 | 0.8638 | 34.4185 |
+| RRDN 9rrdb (Composite SSIM alpha=0.2) | 3.9255 | 0.1083 | 0.8583 | 34.0570 |
+| RRDN 9rrdb (Composite SSIM alpha=0.5) | 3.9351 | -0.0773 | 0.8586 | 34.0281 |
+| RRDN 9rrdb (Composite SSIM alpha=0.8) | 3.4219 | -0.0230 | 0.8835 | 35.2625 |
+| RRDN 3rrdb (Total Physics) | 3.9155 | -0.0444 | 0.8564 | 34.0669 |
+| RRDN 5rrdb (Total Physics) | 3.9136 | 0.0122 | 0.8578 | 34.1296 |
+| RRDN 7rrdb (Total Physics) | 4.0036 | 0.0211 | 0.8543 | 33.9050 |
+| RRDN 9rrdb (Total Physics) | 3.7732 | 0.0542 | 0.8626 | 34.4249 |
+| RRDN 11rrdb (Total Physics) | 3.9279 | -0.0343 | 0.8555 | 34.0494 |
+| RRDN 20rrdb (Total Physics) | 3.9616 | -0.0457 | 0.8549 | 33.9725 |
+| RRDN-GAN 9rrdb (No BatchNorm) | 3.2596 | **0.0506** | 0.8902 | 35.6568 |
+| RRDN-GAN 9rrdb (With BatchNorm) | **3.2213** | 0.1183 | **0.8914** | **35.7417** |
+
+RMSE is computed globally by pooling all pixels from all scenes into one error array and calculating one RMSE value. Bias is also computed globally by pooling every pixel from every scene and averaging the signed error. SSIM is computed per scene and then averaged across scenes. PSNR is computed globally from the same global MSE value.
+
+Across both evaluation sets, the RRDN-GAN variants produce the strongest RMSE, SSIM, and PSNR results. The Composite SSIM alpha=0.8 model is the strongest non-GAN model, while increasing RRDB depth or adding the current total-physics loss does not consistently improve reconstruction.
 
 ### Reconstruction and residuals
 
