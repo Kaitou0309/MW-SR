@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from skimage.transform import resize
 
+from geo_plotting import load_coordinates, plot_bt_panel
+
 
 LR_DATASET_CANDIDATES = ("L/bt", "bt")
 
@@ -80,9 +82,16 @@ def load_plot_data(path: Path, args: argparse.Namespace):
                 label = label.decode("utf-8")
             predictions.append((str(label), select_scene(dataset[:], args.scene_index)))
 
+        target_shape = hr.shape if hr is not None else predictions[0][1].shape if predictions else None
+        coordinates = (
+            load_coordinates(handle, target_shape, args.scene_index, preferred_groups=("H", "L", ""))
+            if target_shape is not None
+            else None
+        )
+
     if not predictions:
         raise ValueError("No model_predictions/<model>/bt datasets were found.")
-    return lr, hr, predictions
+    return lr, hr, predictions, coordinates
 
 
 def resized_lr(lr: np.ndarray, target_shape: tuple[int, int]) -> np.ndarray:
@@ -103,7 +112,7 @@ def bt_limits(images: list[np.ndarray]) -> tuple[float, float]:
     return tuple(float(value) for value in np.percentile(np.concatenate(finite), (1, 99)))
 
 
-def plot_with_truth(path: Path, output: Path, lr: np.ndarray, hr: np.ndarray, predictions, args) -> None:
+def plot_with_truth(path: Path, output: Path, lr: np.ndarray, hr: np.ndarray, predictions, coordinates, args) -> None:
     lr_up = resized_lr(lr, hr.shape)
     vmin, vmax = bt_limits([lr_up, hr, *(prediction for _, prediction in predictions)])
     figure, axes = plt.subplots(len(predictions), 4, figsize=(17, 4.3 * len(predictions)), squeeze=False)
@@ -115,14 +124,15 @@ def plot_with_truth(path: Path, output: Path, lr: np.ndarray, hr: np.ndarray, pr
         titles = ("Bilinear LR", label, "Ground Truth", "Residual (SR - HR)")
         for column, (panel, title) in enumerate(zip(panels, titles)):
             is_residual = column == 3
-            image = axes[row, column].imshow(
+            image = plot_bt_panel(
+                axes[row, column],
                 panel,
+                title,
+                coordinates=coordinates,
                 cmap="coolwarm" if is_residual else "turbo",
                 vmin=-args.residual_limit if is_residual else vmin,
                 vmax=args.residual_limit if is_residual else vmax,
             )
-            axes[row, column].set_title(title, fontsize=11)
-            axes[row, column].set_axis_off()
             figure.colorbar(image, ax=axes[row, column], fraction=0.046, pad=0.04, label="K")
 
     figure.suptitle(f"{path.name}, scene {args.scene_index}", fontsize=15, fontweight="bold")
@@ -131,16 +141,22 @@ def plot_with_truth(path: Path, output: Path, lr: np.ndarray, hr: np.ndarray, pr
     plt.close(figure)
 
 
-def plot_without_truth(path: Path, output: Path, lr: np.ndarray, predictions, args) -> None:
+def plot_without_truth(path: Path, output: Path, lr: np.ndarray, predictions, coordinates, args) -> None:
     target_shape = predictions[0][1].shape
     lr_up = resized_lr(lr, target_shape)
     vmin, vmax = bt_limits([lr_up, *(prediction for _, prediction in predictions)])
     panels = [("Bilinear LR", lr_up), *predictions]
     figure, axes = plt.subplots(1, len(panels), figsize=(5 * len(panels), 4.7), squeeze=False)
     for axis, (title, panel) in zip(axes[0], panels):
-        image = axis.imshow(panel, cmap="turbo", vmin=vmin, vmax=vmax)
-        axis.set_title(title, fontsize=11)
-        axis.set_axis_off()
+        image = plot_bt_panel(
+            axis,
+            panel,
+            title,
+            coordinates=coordinates,
+            cmap="turbo",
+            vmin=vmin,
+            vmax=vmax,
+        )
         figure.colorbar(image, ax=axis, fraction=0.046, pad=0.04, label="K")
     figure.suptitle(f"{path.name}, scene {args.scene_index}", fontsize=15, fontweight="bold")
     figure.tight_layout()
@@ -166,11 +182,11 @@ def main() -> None:
             print(f"Keeping existing [{index}/{len(files)}] {output}")
             continue
         try:
-            lr, hr, predictions = load_plot_data(path, args)
+            lr, hr, predictions, coordinates = load_plot_data(path, args)
             if hr is None:
-                plot_without_truth(path, output, lr, predictions, args)
+                plot_without_truth(path, output, lr, predictions, coordinates, args)
             else:
-                plot_with_truth(path, output, lr, hr, predictions, args)
+                plot_with_truth(path, output, lr, hr, predictions, coordinates, args)
             plotted += 1
             print(f"Saved [{index}/{len(files)}] {output}")
         except (OSError, KeyError, IndexError, ValueError) as error:

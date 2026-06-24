@@ -55,9 +55,13 @@ Original AMSR2 observations are available through the JAXA G-Portal. In accordan
 
 The paired LR/HR fields and public example are value-added simulated products created by the project workflow. Users should retain the JAXA acknowledgement when redistributing derived data or publishing results.
 
-## Related observations
+## Qualitative inference examples
 
-ATMS observations used for qualitative applications are available through NOAA CLASS. Tomorrow.io observations were supplied through a research collaboration and remain subject to the applicable data-access policy; they are not distributed in this repository.
+The repository includes compact `ATMS/` and `tomorrow.io.new/` HDF5 examples for public inference demonstrations and geolocated plotting checks. These files are intended to show how the released generators can be applied to compatible one-channel brightness-temperature inputs.
+
+These examples do not replace the paired AMSR2 LR/HR training and evaluation dataset. They generally do not include aligned HR targets, so they support qualitative inspection rather than quantitative reconstruction metrics.
+
+ATMS observations used for qualitative applications are available through NOAA CLASS. Tomorrow.io examples remain subject to the applicable data-access or collaboration terms; confirm redistribution rights before any formal public release or archived dataset deposit.
 
 ## Manuscript source
 

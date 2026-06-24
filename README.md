@@ -11,6 +11,37 @@ The project provides two selected RRDN generators:
 
 The GAN discriminator uses Batch Normalization during training. BatchNorm is not part of the released generator and is not needed for inference.
 
+## Choose your path
+
+This repository is organized for three levels of users.
+
+### 1. Beginner-friendly model use
+
+Start here if you mainly want to run the released model on satellite brightness-temperature HDF5 files and inspect the output. This path is intended for scientists and collaborators who may not need the full RRDN/GAN theory to use the model productively.
+
+- Folder: `beginner_guide/`
+- Notebook: `beginner_guide/notebooks/01_use_pretrained_keras_models.ipynb`
+- Recommended artifact: `.keras`
+- Typical users: applied satellite scientists, NOAA/NASA/research collaborators, meteorology teams, and first-time repository users.
+- Covered workflow: load model, read AMSR2/ATMS/Tomorrow.io-style HDF5 inputs, run prediction, inspect LR and predicted HR output.
+
+### 2. ML-aware model understanding
+
+Use this path if you are comfortable with machine-learning concepts and want to understand the model architecture, losses, validation metrics, and qualitative behavior.
+
+- Folders: `docs/`, `configs/`, `scripts/evaluation/`, `src/bt_super_resolution/models/`
+- Covered topics: RDN/RRDN/RRDB generator design, PatchGAN-style discriminator, Composite SSIM, GAN refinement, residual plots, PSD behavior, and quantitative metrics.
+- Best starting points: the architecture figures below, `MODEL_CARD.md`, `docs/DATA.md`, and the evaluation scripts.
+
+### 3. Training and fine-tuning
+
+Use this path if you want to reproduce training, fine-tune the released generators, or continue training on compatible data. This path assumes you can manage Python environments, HDF5 datasets, GPU/HPC execution, and experiment tracking.
+
+- Folders: `scripts/training/`, `legacy/`, `configs/`, `metadata/`
+- Recommended artifact: `.weights.h5` for architecture reconstruction and continued training; `.keras` for convenient inference.
+- Covered workflow: model creation, normalization, loss selection, RRDN training, GAN refinement, and checkpoint export.
+- Important note: full research datasets and experiment logs are not included in Git. Users must provide compatible training/evaluation HDF5 files and validate their own data rights.
+
 ## Model architecture
 
 ### RRDN generator
@@ -32,6 +63,7 @@ The released GAN generator was trained with the BatchNorm discriminator variant.
 ## Repository layout
 
 ```text
+beginner_guide/     Notebook-first guide for users who just want model inference
 configs/             Release model architecture and training metadata
 docs/                Dataset documentation and selected research figures
 legacy/              Historical model-definition references
@@ -147,6 +179,8 @@ python scripts/inference/make_prediction.py \
 
 The same command accepts a directory and recursively processes every `.h5` or `.hdf5` file.
 
+`make_prediction.py` copies each source HDF5 file before appending predictions, so latitude/longitude variables are preserved when they exist in the source file. Prediction datasets record whether matching geolocation fields were available for plotting.
+
 Use the complete `.keras` models instead of reconstructed weights:
 
 ```bash
@@ -196,6 +230,8 @@ python scripts/evaluation/metrics.py \
 ```
 
 Metrics include RMSE, global PSNR, mean per-scene SSIM, bias, and inference latency. Plotting preserves the complete spatial field; percentile and residual limits affect only color display.
+
+The plotting scripts automatically use longitude and latitude axes when compatible coordinate datasets are present in the HDF5 file. If geolocation variables are missing, plotting falls back to the original pixel-index display.
 
 ## Results and visual evaluation
 

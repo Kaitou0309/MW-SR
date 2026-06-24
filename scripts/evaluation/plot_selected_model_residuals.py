@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
+from geo_plotting import load_coordinates, plot_bt_panel
+
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ROOT = REPOSITORY_ROOT / "src"
 if str(SOURCE_ROOT) not in sys.path:
@@ -101,6 +103,7 @@ def main() -> None:
         with h5py.File(input_path, "r") as handle:
             lr = select_scene(handle[args.lr_key][:], args.scene_index)
             hr = select_scene(handle[args.hr_key][:], args.scene_index)
+            coordinates = load_coordinates(handle, hr.shape, args.scene_index, preferred_groups=("H", "L", ""))
         lr_up = tf.image.resize(lr[None, ..., None], hr.shape, method="bilinear").numpy()[0, ..., 0]
         predictions = [bundle.predict_kelvin(lr, batch_size=args.batch_size) for bundle in bundles]
         finite_bt = np.concatenate([image[np.isfinite(image)] for image in (hr, lr_up, *predictions)])
@@ -112,14 +115,15 @@ def main() -> None:
             titles = ("Bilinear LR", bundle.name, "Ground Truth", "Residual (SR - HR)")
             for column, (panel, title) in enumerate(zip(panels, titles)):
                 residual = column == 3
-                image = axes[row, column].imshow(
+                image = plot_bt_panel(
+                    axes[row, column],
                     panel,
+                    title,
+                    coordinates=coordinates,
                     cmap="coolwarm" if residual else "turbo",
                     vmin=-args.residual_limit if residual else bt_min,
                     vmax=args.residual_limit if residual else bt_max,
                 )
-                axes[row, column].set_title(title, fontsize=11)
-                axes[row, column].set_axis_off()
                 figure.colorbar(image, ax=axes[row, column], fraction=0.046, pad=0.04, label="K")
         figure.suptitle(
             f"{input_path.name}, scene {args.scene_index} ({args.artifact_format})",

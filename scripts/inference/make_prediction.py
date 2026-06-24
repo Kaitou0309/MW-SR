@@ -15,10 +15,14 @@ import h5py
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ROOT = REPOSITORY_ROOT / "src"
+EVALUATION_ROOT = REPOSITORY_ROOT / "scripts" / "evaluation"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
+if str(EVALUATION_ROOT) not in sys.path:
+    sys.path.insert(0, str(EVALUATION_ROOT))
 
 from bt_super_resolution import load_generator, load_keras_generator
+from geo_plotting import load_coordinates
 
 
 DEFAULT_CONFIGS = (
@@ -68,6 +72,21 @@ def lr_dataset(handle: h5py.File) -> str:
 
 def safe_name(name: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "_", name).strip("_")
+
+
+def spatial_shape(values) -> tuple[int, int]:
+    if values.ndim == 2:
+        return tuple(values.shape)
+    if values.ndim == 3:
+        return tuple(values.shape[-2:]) if values.shape[-1] != 1 else tuple(values.shape[:2])
+    if values.ndim == 4:
+        return tuple(values.shape[1:3])
+    raise ValueError(f"Unsupported prediction shape for geolocation check: {values.shape}")
+
+
+def output_spatial_shape(lr, scale: int = 4) -> tuple[int, int]:
+    height, width = spatial_shape(lr)
+    return height * scale, width * scale
 
 
 def load_bundles(args: argparse.Namespace):
@@ -120,6 +139,13 @@ def main() -> None:
 
         with h5py.File(destination, "a") as output_h5:
             root = output_h5.require_group("model_predictions")
+            coordinates = load_coordinates(
+                output_h5,
+                output_spatial_shape(lr),
+                scene_index=0,
+                preferred_groups=("H", "L", ""),
+            )
+            geolocation_available = coordinates is not None
             for bundle in bundles:
                 group = root.require_group(safe_name(bundle.name))
                 if "bt" in group:
@@ -133,6 +159,7 @@ def main() -> None:
                 dataset.attrs["model_name"] = bundle.name
                 dataset.attrs["artifact_file"] = bundle.weights_path.name
                 dataset.attrs["artifact_format"] = args.artifact_format
+                dataset.attrs["geolocation_preserved_from_source"] = bool(geolocation_available)
                 if args.artifact_format == "weights":
                     dataset.attrs["weights_file"] = bundle.weights_path.name
                 else:

@@ -27,6 +27,12 @@ outputs/
 !sample_data/
 !sample_data/amsr2_example.h5
 
+# Keep compact qualitative sensor examples for public inference demos.
+!ATMS/
+!ATMS/**/*.h5
+!tomorrow.io.new/
+!tomorrow.io.new/**/*.h5
+
 # Release binaries are uploaded through GitHub Releases, not Git history.
 release_assets/*
 !release_assets/README.md

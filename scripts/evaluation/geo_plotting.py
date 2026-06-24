@@ -1,0 +1,188 @@
+"""Small plotting helpers for geolocated brightness-temperature panels."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+import h5py
+import numpy as np
+from matplotlib.ticker import FuncFormatter
+
+
+LAT_NAMES = {"lat", "latitude"}
+LON_NAMES = {"lon", "long", "longitude"}
+
+
+@dataclass(frozen=True)
+class Coordinates:
+    latitude: np.ndarray
+    longitude: np.ndarray
+
+
+def select_scene(values: np.ndarray, scene_index: int) -> np.ndarray:
+    values = np.asarray(values)
+    if values.ndim == 4:
+        return values[scene_index, ..., 0]
+    if values.ndim == 3:
+        return values[..., 0] if values.shape[-1] == 1 else values[scene_index]
+    if values.ndim == 2:
+        if scene_index != 0:
+            raise IndexError(f"A 2D coordinate dataset has only scene index 0, not {scene_index}.")
+        return values
+    if values.ndim == 1:
+        return values
+    raise ValueError(f"Unsupported coordinate shape: {values.shape}")
+
+
+def _basename(name: str) -> str:
+    return name.rsplit("/", 1)[-1].lower()
+
+
+def _candidate_paths(handle: h5py.File, names: set[str]) -> list[str]:
+    exact = []
+    fuzzy = []
+
+    def visit(name: str, obj) -> None:
+        if not isinstance(obj, h5py.Dataset):
+            return
+        base = _basename(name)
+        if base in names:
+            exact.append(name)
+        elif any(token in base for token in names):
+            fuzzy.append(name)
+
+    handle.visititems(visit)
+    return exact + fuzzy
+
+
+def _score_path(path: str, preferred_groups: tuple[str, ...]) -> int:
+    score = 0
+    parts = path.lower().split("/")
+    for index, group in enumerate(preferred_groups):
+        if group and group.lower() in parts:
+            score += 100 - index
+    if _basename(path) in LAT_NAMES or _basename(path) in LON_NAMES:
+        score += 10
+    return score
+
+
+def _resize_2d(values: np.ndarray, target_shape: tuple[int, int]) -> np.ndarray:
+    """Linearly resize a 2D coordinate grid for display-only geolocation."""
+
+    if values.shape == target_shape:
+        return values.astype(np.float32)
+    row_source = np.linspace(0.0, 1.0, values.shape[0])
+    row_target = np.linspace(0.0, 1.0, target_shape[0])
+    col_source = np.linspace(0.0, 1.0, values.shape[1])
+    col_target = np.linspace(0.0, 1.0, target_shape[1])
+    row_resized = np.empty((target_shape[0], values.shape[1]), dtype=np.float32)
+    for column in range(values.shape[1]):
+        row_resized[:, column] = np.interp(row_target, row_source, values[:, column])
+    resized = np.empty(target_shape, dtype=np.float32)
+    for row in range(target_shape[0]):
+        resized[row, :] = np.interp(col_target, col_source, row_resized[row, :])
+    return resized
+
+
+def _load_matching_coordinate(
+    handle: h5py.File,
+    paths: list[str],
+    target_shape: tuple[int, int],
+    scene_index: int,
+    preferred_groups: tuple[str, ...],
+) -> np.ndarray | None:
+    ranked = sorted(paths, key=lambda path: _score_path(path, preferred_groups), reverse=True)
+    for path in ranked:
+        try:
+            values = select_scene(handle[path][:], scene_index)
+        except (IndexError, ValueError):
+            continue
+        if values.shape == target_shape:
+            return values.astype(np.float32)
+        if values.ndim == 2 and np.isfinite(values).any():
+            return _resize_2d(values.astype(np.float32), target_shape)
+        if values.ndim == 1 and values.size in target_shape:
+            return values.astype(np.float32)
+    return None
+
+
+def load_coordinates(
+    handle: h5py.File,
+    target_shape: tuple[int, int],
+    scene_index: int = 0,
+    preferred_groups: tuple[str, ...] = ("H", "L", ""),
+) -> Coordinates | None:
+    """Return latitude/longitude arrays matching a plotted panel shape when available."""
+
+    lat = _load_matching_coordinate(
+        handle,
+        _candidate_paths(handle, LAT_NAMES),
+        target_shape,
+        scene_index,
+        preferred_groups,
+    )
+    lon = _load_matching_coordinate(
+        handle,
+        _candidate_paths(handle, LON_NAMES),
+        target_shape,
+        scene_index,
+        preferred_groups,
+    )
+    if lat is None or lon is None:
+        return None
+    if lat.ndim == 1 and lon.ndim == 1:
+        if lat.size == target_shape[0] and lon.size == target_shape[1]:
+            lon, lat = np.meshgrid(lon, lat)
+        elif lat.size == target_shape[1] and lon.size == target_shape[0]:
+            lat, lon = np.meshgrid(lat, lon)
+        else:
+            return None
+    if lat.shape != target_shape or lon.shape != target_shape:
+        return None
+    if not np.isfinite(lat).any() or not np.isfinite(lon).any():
+        return None
+    return Coordinates(latitude=lat, longitude=lon)
+
+
+def _format_lon(value: float, _position: int) -> str:
+    suffix = "E" if value >= 0 else "W"
+    return f"{abs(value):g}°{suffix}"
+
+
+def _format_lat(value: float, _position: int) -> str:
+    suffix = "N" if value >= 0 else "S"
+    return f"{abs(value):g}°{suffix}"
+
+
+def plot_bt_panel(
+    axis,
+    panel: np.ndarray,
+    title: str,
+    *,
+    coordinates: Coordinates | None,
+    cmap: str,
+    vmin: float,
+    vmax: float,
+):
+    """Plot a BT or residual panel with geodetic axes when coordinates exist."""
+
+    if coordinates is None:
+        image = axis.imshow(panel, cmap=cmap, vmin=vmin, vmax=vmax)
+        axis.set_axis_off()
+    else:
+        image = axis.pcolormesh(
+            coordinates.longitude,
+            coordinates.latitude,
+            panel,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            shading="auto",
+        )
+        axis.set_xlabel("Longitude")
+        axis.set_ylabel("Latitude")
+        axis.xaxis.set_major_formatter(FuncFormatter(_format_lon))
+        axis.yaxis.set_major_formatter(FuncFormatter(_format_lat))
+        axis.tick_params(labelsize=8)
+    axis.set_title(title, fontsize=11, fontweight="bold")
+    return image
