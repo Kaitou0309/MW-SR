@@ -216,10 +216,10 @@ python github_case/atms_example.py
 The script reads the SDR brightness-temperature array, applies the ATMS scale factors, extracts channel 16, loads the matching latitude/longitude swath, and writes an original-resolution map such as:
 
 ```text
-orig.png
+github_case/orig.png
 ```
 
-Because `orig.png` is a relative output path, it is saved in the directory where the command is run. If the command is run from the repository root, the file appears at `./orig.png`.
+The current example writes the output figure into the `github_case/` folder so it stays next to the raw-data demonstration script.
 
 This raw ATMS example is useful for visual inspection and for understanding how ATMS swath data are organized. It is not the same as the model prediction pipeline. To run the released RRDN or RRDN-GAN model, first prepare a model-ready HDF5 file containing a compatible brightness-temperature dataset, then use `scripts/inference/make_prediction.py`.
 
