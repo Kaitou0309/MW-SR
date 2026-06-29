@@ -86,8 +86,8 @@ def make_plot(atms_lon, atms_lat, atms_bt, title_str='', extent=None,
 def main (): 
   
     ### get the ATMS file list 
-    atms_geo_files = sorted(glob.glob('./data/GATMO_j01_d20260415*.h5'))
-    atms_sdr_files = sorted(glob.glob('./data/SATMS_j01_d20260415*.h5'))
+    atms_geo_files = sorted(glob.glob('github_case/data/GATMO_j01_d20260415*.h5'))
+    atms_sdr_files = sorted(glob.glob('github_case/data/SATMS_j01_d20260415*.h5'))
     
     ### Read Brightness Temperaute  
     sdrs = [h5py.File(filename, 'r') for filename in atms_sdr_files]
@@ -132,7 +132,7 @@ def main ():
     
     
     ## make plots for orginal resolotion 
-    make_plot(lon, lat, bt, title_str='orig ', extent=extent, outfile='orig.png')
+    make_plot(lon, lat, bt, title_str='orig ', extent=extent, outfile='github_case/orig.png')
     
     ## make plots for high resolotion 
     # 3. Zoom coordinates linearly to match the 4x super-resolution prediction grid
