@@ -42,4 +42,4 @@ The public example is intended for software validation only. Full scientific ben
 
 ## Training and modification
 
-The official weights may be used directly, fine-tuned, or continued on compatible user data under `MODEL_LICENSE.md`. Users must recompute or deliberately validate normalization statistics when changing sensors or datasets.
+The official weights may be used directly, fine-tuned, or continued on compatible user data for noncommercial purposes under `MODEL_LICENSE.md`. Users must recompute or deliberately validate normalization statistics when changing sensors or datasets.

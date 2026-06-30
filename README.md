@@ -384,7 +384,7 @@ It is not a training dataset. The complete local `AMSR2/` collection remains out
 
 ## License
 
-Source code and official released generator weights are licensed under Apache-2.0. This permits model use, modification, fine-tuning, continued training, and redistribution subject to the license and notices. See `LICENSE`, `NOTICE`, and `MODEL_LICENSE.md`.
+Source code and official released generator weights are publicly available under the PolyForm Noncommercial License 1.0.0. This permits noncommercial research, education, evaluation, inference, modification, fine-tuning, continued training, and redistribution subject to the license and notices. Commercial use is not permitted without prior written permission from the copyright holders. See `LICENSE`, `NOTICE`, and `MODEL_LICENSE.md`.
 
 Third-party and full research datasets retain their respective terms and are not relicensed by this repository.
 
