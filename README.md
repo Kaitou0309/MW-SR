@@ -225,13 +225,32 @@ This raw ATMS example is useful for visual inspection and for understanding how 
 
 ## Evaluation and plots
 
+Compute metrics directly from model-ready HDF5 inputs:
+
 ```bash
 python scripts/evaluation/metrics.py \
     --data sample_data/amsr2_example.h5 \
     --output outputs/example_metrics.csv \
     --plot-output outputs/example_metrics_matrix.png \
     --strict
+```
 
+`metrics.py` reports numerical performance and writes the metrics table/summary plot. It does not create a prediction HDF5 file.
+
+To plot saved predictions, first create the prediction file with `make_prediction.py`:
+
+```bash
+python scripts/inference/make_prediction.py \
+    --input sample_data/amsr2_example.h5 \
+    --output outputs/example_with_predictions.h5 \
+    --batch-size 1 \
+    --overwrite \
+    --strict
+```
+
+Then call `plot_predictions.py` on that `make_prediction.py` output:
+
+```bash
 python scripts/evaluation/plot_predictions.py \
     --input outputs/example_with_predictions.h5 \
     --output-dir outputs/prediction_plots \
