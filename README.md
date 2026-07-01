@@ -416,7 +416,7 @@ If this software supports your work, please cite the repository:
   author = {Wang, Likun and Chen, Kongkun},
   title = {Satellite Brightness Temperature Super-Resolution},
   year = {2026},
-  url = {https://github.com/Kaitou0309/satellite-bt-super-resolution}
+  url = {https://github.com/Kaitou0309/MW-SR}
 }
 ```
 
