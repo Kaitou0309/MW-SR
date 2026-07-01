@@ -42,3 +42,4 @@ release_assets/*
 !metadata/unified_global_stats.npz
 tomorrow.io.new/
 tomorrow.io.new/
+unified_global_stats.npz

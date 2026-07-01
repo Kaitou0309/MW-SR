@@ -4,13 +4,13 @@ import numpy as np
 import pytest
 import yaml
 
-from bt_super_resolution import load_generator, load_keras_generator
+from mw_super_resolution import load_generator, load_keras_generator
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 CONFIGS = (
-    REPOSITORY_ROOT / "configs/rrdn_composite_ssim_alpha_0.8.yaml",
-    REPOSITORY_ROOT / "configs/rrdn_gan_batchnorm.yaml",
+    REPOSITORY_ROOT / "configs/mw_sr.yaml",
+    REPOSITORY_ROOT / "configs/mw_sr_gan.yaml",
 )
 
 

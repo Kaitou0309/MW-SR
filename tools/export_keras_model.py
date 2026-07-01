@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import tensorflow as tf
 
-from bt_super_resolution import load_generator
+from mw_super_resolution import load_generator
 
 
 def parse_args() -> argparse.Namespace:

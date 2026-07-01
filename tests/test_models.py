@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from bt_super_resolution.models import build_patch_discriminator, build_rrdn
+from mw_super_resolution.models import build_patch_discriminator, build_rrdn
 
 
 def test_rrdn_output_is_four_times_larger() -> None:

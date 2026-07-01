@@ -1,6 +1,10 @@
-# Satellite Brightness Temperature Super-Resolution
+# Microwave Super-Resolution Model (MW-SR)
 
 TensorFlow models and reproducible workflows for reconstructing four-times higher-resolution 89 GHz satellite microwave brightness-temperature fields from low-resolution observations.
+
+![Low-resolution input, bilinear interpolation, MW-SR-GAN prediction, and high-resolution truth for a hurricane scene](docs/figures/LR_Prediction_Truth.png)
+
+This paired hurricane example compares the original LR input, bilinear interpolation, the MW-SR-GAN reconstruction, and the aligned HR target. The enlarged region shows where the learned model restores sharper eyewall and rainband organization than interpolation alone.
 
 The project provides two selected microwave super-resolution generators:
 
@@ -31,7 +35,7 @@ Start here if you mainly want to run the released model on satellite brightness-
 
 Use this path if you are comfortable with machine-learning concepts and want to understand the model architecture, losses, validation metrics, and qualitative behavior.
 
-- Folders: `docs/`, `configs/`, `scripts/evaluation/`, `src/bt_super_resolution/models/`
+- Folders: `docs/`, `configs/`, `scripts/evaluation/`, `src/mw_super_resolution/models/`
 - Covered topics: RDN/RRDN/RRDB generator design, PatchGAN-style discriminator, Composite SSIM, GAN refinement, residual plots, PSD behavior, and quantitative metrics.
 - Best starting points: the architecture figures below, `MODEL_CARD.md`, `docs/DATA.md`, and the evaluation scripts.
 
@@ -82,7 +86,7 @@ tools/                HDF5, checkpoint, and sample-generation utilities
 
 Raw datasets, generated outputs, scheduler logs, and checkpoint binaries are intentionally excluded from Git history.
 
-The original Chen architecture implementations are preserved as `src/bt_super_resolution/models/rdn_chen.py` and `rrdn_chen.py`. Training calls the original `build_RRDN` function directly. The public `build_rrdn` API is only a config-name adapter around that same implementation, ensuring training and inference reconstruct an identical layer topology.
+The original Chen architecture implementations are preserved as `src/mw_super_resolution/models/rdn_chen.py` and `rrdn_chen.py`. Training calls the original `build_RRDN` function directly. The public `build_rrdn` API is only a config-name adapter around that same implementation, ensuring training and inference reconstruct an identical layer topology.
 
 ## Installation
 
@@ -90,7 +94,7 @@ Using Conda:
 
 ```bash
 conda env create -f environment.yml
-conda activate bt-super-resolution
+conda activate MW-SR-Env
 ```
 
 Using an existing Python 3.10 environment:
@@ -137,9 +141,9 @@ The exports have an empty compile configuration because they are inference-focus
 ## Python inference
 
 ```python
-from bt_super_resolution import load_generator
+from mw_super_resolution import load_generator
 
-bundle = load_generator("configs/rrdn_composite_ssim_alpha_0.8.yaml")
+bundle = load_generator("configs/mw_sr.yaml")
 prediction_kelvin = bundle.predict_kelvin(lr_bt, batch_size=8)
 ```
 
@@ -148,9 +152,9 @@ The loader reconstructs the exact architecture, verifies the checkpoint checksum
 For Kelvin-aware inference from a complete Keras artifact, use the repository loader:
 
 ```python
-from bt_super_resolution import load_keras_generator
+from mw_super_resolution import load_keras_generator
 
-bundle = load_keras_generator("configs/rrdn_composite_ssim_alpha_0.8.yaml")
+bundle = load_keras_generator("configs/mw_sr.yaml")
 prediction_kelvin = bundle.predict_kelvin(lr_bt, batch_size=8)
 ```
 
@@ -330,10 +334,6 @@ Across both evaluation sets, MW-SR-GAN variants produce the strongest RMSE, SSIM
 
 ### Reconstruction and residuals
 
-![Low-resolution input, bilinear interpolation, MW-SR-GAN prediction, and high-resolution truth for a hurricane scene](docs/figures/LR_Prediction_Truth.png)
-
-This paired hurricane example compares the original LR input, bilinear interpolation, the MW-SR-GAN reconstruction, and the aligned HR target. The enlarged region shows where the learned model restores sharper eyewall and rainband organization than interpolation alone.
-
 ![MW-SR and MW-SR-GAN reconstructions with residual maps and pixel-error distributions](docs/figures/Image_Reconstruction_Residual_of_Models.png)
 
 Residual maps show `truth - prediction` in Kelvin and make spatially organized errors visible. In this scene, adversarial refinement reduces the displayed error spread relative to the Composite SSIM model while preserving sharper storm structure. A strong visual result should still be read together with RMSE, bias, PSNR, and SSIM because sharper output is not automatically more physically correct.
@@ -414,7 +414,7 @@ If this software supports your work, please cite the repository:
 ```bibtex
 @software{wang2026satellite_bt_super_resolution,
   author = {Wang, Likun and Chen, Kongkun},
-  title = {Satellite Brightness Temperature Super-Resolution},
+  title = {Microwave Super Resolution},
   year = {2026},
   url = {https://github.com/Kaitou0309/MW-SR}
 }

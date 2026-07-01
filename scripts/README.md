@@ -1,6 +1,6 @@
 # Runnable Workflows
 
-These scripts use the canonical `bt_super_resolution` package under `src/`.
+These scripts use the canonical `mw_super_resolution` package under `src/`.
 
 ## Contents
 
@@ -18,6 +18,6 @@ Model YAML files are the source of truth for released architecture, checkpoint, 
 
 `make_prediction.py` preserves source HDF5 geolocation variables by copying the source file before appending model predictions. `plot_predictions.py` and `plot_selected_model_residuals.py` automatically use longitude/latitude axes when compatible coordinate arrays are present, and fall back to pixel-index plots otherwise.
 
-Both training scripts call the preserved original `bt_super_resolution.models.build_RRDN` architecture implementation used by the research training workflow.
+Both training scripts call the preserved original `mw_super_resolution.models.build_RRDN` architecture implementation used by the research training workflow.
 
 The scripts can run directly from a repository checkout. Installing the package with `python -m pip install -e .` is still recommended for development.

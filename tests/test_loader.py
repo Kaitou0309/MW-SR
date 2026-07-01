@@ -4,8 +4,8 @@ import json
 import numpy as np
 import yaml
 
-from bt_super_resolution import load_generator
-from bt_super_resolution.models import build_rrdn
+from mw_super_resolution import load_generator
+from mw_super_resolution.models import build_rrdn
 
 
 def test_config_driven_loader_and_kelvin_prediction(tmp_path: Path) -> None:

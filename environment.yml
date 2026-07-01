@@ -1,4 +1,4 @@
-name: bt-super-resolution
+name: MW-SR-Env
 channels:
   - conda-forge
 dependencies:

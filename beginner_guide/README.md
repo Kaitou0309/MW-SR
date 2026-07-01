@@ -1,6 +1,6 @@
 # Beginner Guide
 
-This folder is for users who want to run the released brightness-temperature super-resolution models without needing to understand the full machine-learning architecture first.
+This folder is for users who want to run the released microwave super-resolution models without needing to understand the full machine-learning architecture first.
 
 The intended audience includes satellite scientists, operational meteorology researchers, and collaborators from institutions such as NOAA, NASA, universities, or private weather-data teams who mainly need a practical workflow:
 

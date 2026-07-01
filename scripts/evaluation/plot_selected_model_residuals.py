@@ -24,12 +24,12 @@ SOURCE_ROOT = REPOSITORY_ROOT / "src"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from bt_super_resolution import load_generator, load_keras_generator
+from mw_super_resolution import load_generator, load_keras_generator
 
 
 DEFAULT_CONFIGS = (
-    REPOSITORY_ROOT / "configs/rrdn_composite_ssim_alpha_0.8.yaml",
-    REPOSITORY_ROOT / "configs/rrdn_gan_batchnorm.yaml",
+    REPOSITORY_ROOT / "configs/mw_sr.yaml",
+    REPOSITORY_ROOT / "configs/mw_sr_gan.yaml",
 )
 
 

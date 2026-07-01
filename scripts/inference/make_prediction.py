@@ -21,13 +21,13 @@ if str(SOURCE_ROOT) not in sys.path:
 if str(EVALUATION_ROOT) not in sys.path:
     sys.path.insert(0, str(EVALUATION_ROOT))
 
-from bt_super_resolution import load_generator, load_keras_generator
+from mw_super_resolution import load_generator, load_keras_generator
 from geo_plotting import load_coordinates, normalization_note
 
 
 DEFAULT_CONFIGS = (
-    REPOSITORY_ROOT / "configs/rrdn_composite_ssim_alpha_0.8.yaml",
-    REPOSITORY_ROOT / "configs/rrdn_gan_batchnorm.yaml",
+    REPOSITORY_ROOT / "configs/mw_sr.yaml",
+    REPOSITORY_ROOT / "configs/mw_sr_gan.yaml",
 )
 LR_DATASET_CANDIDATES = ("L/bt", "bt")
 

@@ -1,4 +1,4 @@
-name: rrdn_gan_with_batchnorm_discriminator
+name: mw_sr_gan
 display_name: MW-SR-GAN
 release_status: selected_for_release
 task: brightness_temperature_super_resolution

@@ -17,8 +17,8 @@ SOURCE_ROOT = REPOSITORY_ROOT / "src"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from bt_super_resolution.models import build_patch_discriminator, build_RRDN
-from bt_super_resolution.normalization import load_normalization_stats
+from mw_super_resolution.models import build_patch_discriminator, build_RRDN
+from mw_super_resolution.normalization import load_normalization_stats
 
 
 # ==================================================
