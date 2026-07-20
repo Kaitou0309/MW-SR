@@ -77,7 +77,6 @@ APPROVED_HDF5_DATA_DIRS = (
     Path("sample_data"),
     Path("AMSR2"),
     Path("ATMS"),
-    Path("tomorrow.io.new"),
     Path("github_case/data"),
     Path("outputs"),
     Path("legacy/checkpoints"),
