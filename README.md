@@ -93,8 +93,16 @@ The original Chen architecture implementations are preserved as [src/mw_super_re
 Using Conda:
 
 ```bash
+git clone https://github.com/Kaitou0309/MW-SR.git
+cd MW-SR
 conda env create -f environment.yml
 conda activate MW-SR-Env
+```
+
+Verify that the installation, repository layout, and smoke tests pass:
+
+```bash
+python tests/test_installation.py
 ```
 
 Using an existing Python 3.10 environment:
