@@ -15,6 +15,36 @@ The project provides two selected microwave super-resolution generators:
 
 The GAN discriminator uses Batch Normalization during training. BatchNorm is not part of the released generator and is not needed for inference.
 
+## Installation
+
+Using Conda:
+
+```bash
+git clone https://github.com/Kaitou0309/MW-SR.git
+cd MW-SR
+conda env create -f environment.yml
+conda activate MW-SR-Env
+```
+
+Verify that the installation, repository layout, and smoke tests pass:
+
+```bash
+python tests/test_installation.py
+```
+
+Using an existing Python 3.10 environment:
+
+```bash
+python -m pip install -e .
+```
+
+For development and tests:
+
+```bash
+python -m pip install -e ".[dev]"
+python -m pytest -m "not release"
+```
+
 ## Choose your path
 
 This repository is organized for three levels of users.
@@ -87,36 +117,6 @@ The released MW-SR-GAN generator was trained with the BatchNorm discriminator va
 Raw datasets, generated outputs, scheduler logs, and checkpoint binaries are intentionally excluded from Git history.
 
 The original Chen architecture implementations are preserved as [src/mw_super_resolution/models/rdn_chen.py](src/mw_super_resolution/models/rdn_chen.py) and [src/mw_super_resolution/models/rrdn_chen.py](src/mw_super_resolution/models/rrdn_chen.py). Training calls the original `build_RRDN` function directly. The public `build_rrdn` API is only a config-name adapter around that same implementation, ensuring training and inference reconstruct an identical layer topology.
-
-## Installation
-
-Using Conda:
-
-```bash
-git clone https://github.com/Kaitou0309/MW-SR.git
-cd MW-SR
-conda env create -f environment.yml
-conda activate MW-SR-Env
-```
-
-Verify that the installation, repository layout, and smoke tests pass:
-
-```bash
-python tests/test_installation.py
-```
-
-Using an existing Python 3.10 environment:
-
-```bash
-python -m pip install -e .
-```
-
-For development and tests:
-
-```bash
-python -m pip install -e ".[dev]"
-python -m pytest -m "not release"
-```
 
 ## Model files
 
