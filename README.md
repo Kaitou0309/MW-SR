@@ -26,16 +26,47 @@ conda env create -f environment.yml
 conda activate MW-SR-Env
 ```
 
-Verify that the installation, repository layout, and smoke tests pass:
+If `MW-SR-Env` already exists, update it instead of recreating it:
+
+```bash
+conda env update -f environment.yml --prune
+conda activate MW-SR-Env
+```
+
+### Download pretrained models
+
+The pretrained MW-SR and MW-SR-GAN model files are distributed through GitHub Releases, not Git history. Download the model artifacts from:
+
+[MW-SR v0.1.0 model release](https://github.com/Kaitou0309/MW-SR/releases/tag/v0.1.0)
+
+Place the downloaded `.keras`, `.weights.h5`, and `SHA256SUMS.txt` files in the local [release_assets/](release_assets/) directory:
+
+```text
+release_assets/bt-sr-rrdn-9rrdb-composite-ssim-a08-v0.1.0.weights.h5
+release_assets/bt-sr-rrdn-9rrdb-composite-ssim-a08-v0.1.0.keras
+release_assets/bt-sr-rrdn-gan-9rrdb-bn-generator-v0.1.0.weights.h5
+release_assets/bt-sr-rrdn-gan-9rrdb-bn-generator-v0.1.0.keras
+release_assets/SHA256SUMS.txt
+```
+
+These files do not appear in the `release_assets/` folder when browsing the repository on GitHub because large model binaries are intentionally excluded from Git history.
+
+Verify that the installation, repository layout, downloaded model artifacts, and smoke tests pass:
 
 ```bash
 python tests/test_installation.py
 ```
 
-Using an existing Python 3.10 environment:
+Using an existing Python 3.10 environment for command-line inference only:
 
 ```bash
 python -m pip install -e .
+```
+
+For notebook support in an existing Python 3.10 environment:
+
+```bash
+python -m pip install -e ".[notebook]"
 ```
 
 For development and tests:
@@ -120,20 +151,27 @@ The original Chen architecture implementations are preserved as [src/mw_super_re
 
 ## Model files
 
-Each selected generator is distributed in two formats through GitHub Releases. Training was performed on an HPC environment that did not support saving the newer `.keras` format, so the original selected checkpoints were saved as weights-only `.weights.h5` files. Those validated checkpoints are preserved for architecture reconstruction, fine-tuning, and HPC compatibility. Equivalent `.keras` files are exported afterward for easier loading and prediction.
+Each selected generator is distributed in two formats through [GitHub Releases](https://github.com/Kaitou0309/MW-SR/releases/tag/v0.1.0). Training was performed on an HPC environment that did not support saving the newer `.keras` format, so the original selected checkpoints were saved as weights-only `.weights.h5` files. Those validated checkpoints are preserved for architecture reconstruction, fine-tuning, and HPC compatibility. Equivalent `.keras` files are exported afterward for easier loading and prediction.
 
-The expected filenames and SHA-256 checksums are recorded in [configs/](configs/) and [release_assets/SHA256SUMS.txt](release_assets/SHA256SUMS.txt).
+Model binaries are intentionally excluded from Git history. The repository keeps the source code, configs, metadata, docs, and checksum manifest, while the actual model files are attached to the versioned release page.
 
-Place downloaded files under [release_assets/](release_assets/):
+Download the assets from [MW-SR v0.1.0 model release](https://github.com/Kaitou0309/MW-SR/releases/tag/v0.1.0), then place them under your local [release_assets/](release_assets/) directory:
 
 ```text
 release_assets/bt-sr-rrdn-9rrdb-composite-ssim-a08-v0.1.0.weights.h5
 release_assets/bt-sr-rrdn-9rrdb-composite-ssim-a08-v0.1.0.keras
 release_assets/bt-sr-rrdn-gan-9rrdb-bn-generator-v0.1.0.weights.h5
 release_assets/bt-sr-rrdn-gan-9rrdb-bn-generator-v0.1.0.keras
+release_assets/SHA256SUMS.txt
 ```
 
-<!-- TODO: Replace with links to the first versioned GitHub Release. -->
+The expected filenames and SHA-256 checksums are recorded in [configs/](configs/) and [release_assets/SHA256SUMS.txt](release_assets/SHA256SUMS.txt). After downloading the files, run:
+
+```bash
+python tests/test_installation.py
+```
+
+The release-artifact checks will load the downloaded `.keras` and `.weights.h5` models if they are present. If the models have not been downloaded yet, those release checks are skipped.
 
 ### What the `.keras` files contain
 

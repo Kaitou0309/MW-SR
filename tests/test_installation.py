@@ -36,6 +36,9 @@ DEPENDENCIES = (
     Dependency("skimage", "scikit-image"),
     Dependency("tensorflow", "tensorflow"),
     Dependency("mw_super_resolution", "mw-sr"),
+    Dependency("jupyterlab", "jupyterlab"),
+    Dependency("notebook", "notebook"),
+    Dependency("ipykernel", "ipykernel"),
     Dependency("pandas", "pandas", required=False),
     Dependency("sklearn", "scikit-learn", required=False),
     Dependency("pytest", "pytest"),
@@ -77,6 +80,7 @@ APPROVED_HDF5_DATA_DIRS = (
     Path("sample_data"),
     Path("AMSR2"),
     Path("ATMS"),
+    Path("tomorrow.io.new"),
     Path("github_case/data"),
     Path("outputs"),
     Path("legacy/checkpoints"),
@@ -189,7 +193,7 @@ def test_required_dependencies_importable() -> None:
         "Missing required MW-SR dependencies:\n"
         + "\n".join(f"- {item}" for item in missing_required)
         + "\n\nInstall with:\n"
-        + "conda env create -f environment.yml\n"
+        + "conda env update -f environment.yml --prune\n"
         + "conda activate MW-SR-Env\n"
         + "python -m pip install -e ."
     )
@@ -273,7 +277,7 @@ def main() -> int:
 
     if missing_required:
         print("\nRequired dependencies are missing. From the repository root, run:")
-        print("  conda env create -f environment.yml")
+        print("  conda env update -f environment.yml --prune")
         print("  conda activate MW-SR-Env")
         print("  python -m pip install -e .")
 

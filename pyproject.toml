@@ -20,7 +20,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+notebook = ["jupyterlab", "notebook", "ipykernel"]
+dev = ["pytest>=8", "jupyterlab", "notebook", "ipykernel"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

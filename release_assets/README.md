@@ -1,19 +1,37 @@
-# Release Asset Staging
+# Release Assets
 
-This directory is for local review of model binaries before they are uploaded to a GitHub Release. Model files are ignored by Git and must not be committed to repository history.
+This directory is the local destination for pretrained MW-SR model files after users download them from GitHub Releases. The large model binaries are intentionally ignored by Git, so they do not appear in this folder when browsing the repository source tree on GitHub.
 
-## Selected release models
+Download the model artifacts from:
+
+[MW-SR v0.1.0 model release](https://github.com/Kaitou0309/MW-SR/releases/tag/v0.1.0)
+
+Place the downloaded files here:
+
+```text
+release_assets/bt-sr-rrdn-9rrdb-composite-ssim-a08-v0.1.0.weights.h5
+release_assets/bt-sr-rrdn-9rrdb-composite-ssim-a08-v0.1.0.keras
+release_assets/bt-sr-rrdn-gan-9rrdb-bn-generator-v0.1.0.weights.h5
+release_assets/bt-sr-rrdn-gan-9rrdb-bn-generator-v0.1.0.keras
+release_assets/SHA256SUMS.txt
+```
+
+Then verify the installation and downloaded artifacts from the repository root:
+
+```bash
+python tests/test_installation.py
+```
+
+## Selected Release Models
 
 - MW-SR: RRDN composite-SSIM alpha 0.8, 9 RRDB blocks, 3 RDBs per RRDB, 5 convolutional layers per RDB, 64 filters.
 - MW-SR-GAN: MW-SR generator refined with adversarial training using the BatchNorm discriminator.
 
 The HPC training environment did not support the newer `.keras` format, so both selected models were originally stored as weights-only `.weights.h5` checkpoints. Keep those original checkpoints for reproducible architecture reconstruction, fine-tuning, and HPC compatibility. The corresponding `.keras` exports package each generator architecture with its weights for easier loading and prediction. Discriminator weights are not required for inference.
 
-The `.keras` exports contain the complete Functional generator architecture, generator weights, and Keras serialization metadata. They are inference-focused and do not contain compile configuration, optimizer state, training losses or metrics, external normalization statistics, YAML metadata, the GAN discriminator, datasets, or training history. Keep the config and `metadata/unified_global_stats.json` with the model release workflow.
+The `.keras` exports contain the complete Functional generator architecture, generator weights, and Keras serialization metadata. They are inference-focused and do not contain compile configuration, optimizer state, training losses or metrics, external normalization statistics, YAML metadata, the GAN discriminator, datasets, or training history. Keep the config files and `metadata/unified_global_stats.json` with the model release workflow.
 
-Upload all four ignored model files and `SHA256SUMS.txt` to a versioned GitHub Release. Do not force-add model binaries to Git history.
-
-## Release checklist
+## Maintainer Release Checklist
 
 1. Commit and push the tracked source, configs, documentation, and checksum manifest.
 2. From the repository root, run `(cd release_assets && shasum -a 256 -c SHA256SUMS.txt)`.

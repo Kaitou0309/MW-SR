@@ -11,7 +11,13 @@ The intended audience includes satellite scientists, operational meteorology res
 
 ## Start Here
 
-Open:
+JupyterLab, Notebook, and IPykernel are included in `environment.yml`. Open the notebook with JupyterLab after activating `MW-SR-Env`:
+
+```bash
+jupyter lab beginner_guide/notebooks/01_use_pretrained_keras_models.ipynb
+```
+
+Notebook file:
 
 [notebooks/01_use_pretrained_keras_models.ipynb](notebooks/01_use_pretrained_keras_models.ipynb)
 
@@ -25,7 +31,16 @@ Only the small AMSR2 example is intended to be committed to Git. Larger local se
 
 ## Model Format Used Here
 
-The beginner workflow uses the `.keras` model artifacts because they are easiest to load for prediction. The repository loader still applies the required Kelvin normalization and denormalization metadata from [configs/](../configs/) and [metadata/](../metadata/).
+The beginner workflow uses the `.keras` model artifacts because they are easiest to load for prediction. Download the `.keras` model files from the [MW-SR v0.1.0 model release](https://github.com/Kaitou0309/MW-SR/releases/tag/v0.1.0), then place them in [../release_assets/](../release_assets/).
+
+Expected beginner-use files:
+
+```text
+release_assets/bt-sr-rrdn-9rrdb-composite-ssim-a08-v0.1.0.keras
+release_assets/bt-sr-rrdn-gan-9rrdb-bn-generator-v0.1.0.keras
+```
+
+The repository loader still applies the required Kelvin normalization and denormalization metadata from [configs/](../configs/) and [metadata/](../metadata/).
 
 ## When To Use Other Folders
 
